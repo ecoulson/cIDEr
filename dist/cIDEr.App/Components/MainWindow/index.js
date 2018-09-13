@@ -14,16 +14,22 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var Components_1 = require("../../../cIDEr.Editor/Components");
+var Components_2 = require("../../../cIDEr.Toolbar/Components");
+var Components_3 = require("../../../cIDEr.FileSystem/Components");
 ;
-var Editor = /** @class */ (function (_super) {
-    __extends(Editor, _super);
-    function Editor() {
+var MainWindow = /** @class */ (function (_super) {
+    __extends(MainWindow, _super);
+    function MainWindow() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    Editor.prototype.render = function () {
-        return React.createElement("h1", null, "This Is The Editor");
+    MainWindow.prototype.render = function () {
+        return (React.createElement("div", { className: "cIDEr-container" },
+            React.createElement(Components_2.Toolbar, null),
+            React.createElement(Components_1.Editor, null),
+            React.createElement(Components_3.FileSystem, null)));
     };
-    return Editor;
+    return MainWindow;
 }(React.Component));
-exports.Editor = Editor;
+exports.MainWindow = MainWindow;
 //# sourceMappingURL=index.js.map

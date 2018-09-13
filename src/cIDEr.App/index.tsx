@@ -1,9 +1,8 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-
-import { Editor } from "../cIDEr.Editor/Components";
+import { MainWindow } from "./Components/MainWindow";
 
 ReactDOM.render(
-	<Editor compiler="TypeScript" framework="React" />,
+	<MainWindow />,
 	document.getElementById("app")
 );

@@ -15,15 +15,15 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 ;
-var Editor = /** @class */ (function (_super) {
-    __extends(Editor, _super);
-    function Editor() {
+var FileSystem = /** @class */ (function (_super) {
+    __extends(FileSystem, _super);
+    function FileSystem() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    Editor.prototype.render = function () {
+    FileSystem.prototype.render = function () {
         return React.createElement("h1", null, "This Is The Editor");
     };
-    return Editor;
+    return FileSystem;
 }(React.Component));
-exports.Editor = Editor;
+exports.FileSystem = FileSystem;
 //# sourceMappingURL=index.js.map
