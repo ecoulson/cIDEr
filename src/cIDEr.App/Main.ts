@@ -8,6 +8,7 @@ function createWindow() {
 		height: 600,
 		width: 800,
 	});
+	mainWindow.maximize();
 	mainWindow.loadFile(path.join(__dirname, "./views/index.html"));
 
 	mainWindow.on("closed", () => {

@@ -8,6 +8,7 @@ function createWindow() {
         height: 600,
         width: 800,
     });
+    mainWindow.maximize();
     mainWindow.loadFile(path.join(__dirname, "./views/index.html"));
     mainWindow.on("closed", function () {
         mainWindow = null;
@@ -24,4 +25,4 @@ electron_1.app.on("activate", function () {
         createWindow();
     }
 });
-//# sourceMappingURL=main.js.map
+//# sourceMappingURL=Main.js.map

@@ -4,7 +4,7 @@
   "description": "an IDE for c written in TS and electron",
   "main": "app.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && webpack && ./BuildTasks/MoveViews.sh",
     "watch": "tsc -w",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "start": "npm run build && electron ./dist/cIDEr.App/Main.js"
@@ -13,14 +13,19 @@
   "license": "MIT",
   "devDependencies": {
     "awesome-typescript-loader": "^5.2.1",
+    "babel-loader": "^8.0.2",
     "electron": "2.0.8",
+    "react-loader": "^2.4.5",
     "source-map-loader": "^0.2.4",
     "typescript": "^3.0.3"
   },
   "dependencies": {
+    "@types/node": "^10.9.4",
     "@types/react": "^16.4.14",
     "@types/react-dom": "^16.0.7",
     "react": "^16.5.0",
-    "react-dom": "^16.5.0"
+    "react-dom": "^16.5.0",
+    "ts-loader": "^5.1.0",
+    "webpack": "^4.18.0"
   }
 }
