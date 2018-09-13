@@ -1,14 +1,14 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var electron_1 = require("electron");
 var path = require("path");
 var mainWindow;
 function createWindow() {
     mainWindow = new electron_1.BrowserWindow({
         height: 600,
-        width: 800
+        width: 800,
     });
-    mainWindow.loadFile(path.join(__dirname, "../views/index.html"));
+    mainWindow.loadFile(path.join(__dirname, "./views/index.html"));
     mainWindow.on("closed", function () {
         mainWindow = null;
     });

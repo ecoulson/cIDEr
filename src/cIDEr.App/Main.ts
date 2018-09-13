@@ -8,8 +8,7 @@ function createWindow() {
 		height: 600,
 		width: 800,
 	});
-
-	mainWindow.loadFile(path.join(__dirname, "../views/index.html"));
+	mainWindow.loadFile(path.join(__dirname, "./views/index.html"));
 
 	mainWindow.on("closed", () => {
 		mainWindow = null;
