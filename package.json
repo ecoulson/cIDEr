@@ -1,0 +1,17 @@
+{
+  "name": "cider",
+  "version": "1.0.0",
+  "description": "an IDE for c written in TS and electron",
+  "main": "app.js",
+  "scripts": {
+	"build": "tsc",
+    "watch": "tsc -w",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "start": "npm run build && electron ./dist/main.js"
+  },
+  "author": "ecoulson",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "2.0.8"
+  }
+}
