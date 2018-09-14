@@ -37,6 +37,7 @@ export class Editor extends React.Component<EditorProps, {}> {
 						onMouseUp={this.selectLineAction} 
 						onKeyDown={this.lineKeyPressAction} 
 						onKeyUp={this.lineKeyReleasedAction}
+						tabIndex={-1}
 						suppressContentEditableWarning 
 						contentEditable 
 						style={
@@ -73,6 +74,9 @@ export class Editor extends React.Component<EditorProps, {}> {
 	}
 
 	private lineKeyPressAction(event: React.KeyboardEvent<HTMLDivElement>) {
+		if (event.keyCode == 9) {
+			event.preventDefault();
+		}
 		if (event.keyCode == 13) {
 			event.preventDefault();
 			let lines = this.state.lines;

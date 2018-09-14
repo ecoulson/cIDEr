@@ -38,7 +38,7 @@ var Editor = /** @class */ (function (_super) {
         return this.state.lines.map(function (line, i) {
             return (React.createElement("div", { key: i, style: { display: "flex" } },
                 React.createElement("span", null, i + 1),
-                React.createElement("div", { id: "line-" + i, onMouseUp: _this.selectLineAction, onKeyDown: _this.lineKeyPressAction, onKeyUp: _this.lineKeyReleasedAction, suppressContentEditableWarning: true, contentEditable: true, style: {
+                React.createElement("div", { id: "line-" + i, onMouseUp: _this.selectLineAction, onKeyDown: _this.lineKeyPressAction, onKeyUp: _this.lineKeyReleasedAction, tabIndex: -1, suppressContentEditableWarning: true, contentEditable: true, style: {
                         width: "100%",
                         backgroundColor: "rgb(240,240,240)",
                         whiteSpace: "nowrap",
@@ -62,6 +62,9 @@ var Editor = /** @class */ (function (_super) {
             return this.getLineElement(target.parentElement);
     };
     Editor.prototype.lineKeyPressAction = function (event) {
+        if (event.keyCode == 9) {
+            event.preventDefault();
+        }
         if (event.keyCode == 13) {
             event.preventDefault();
             var lines = this.state.lines;
