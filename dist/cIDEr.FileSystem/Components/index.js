@@ -21,7 +21,7 @@ var FileSystem = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     FileSystem.prototype.render = function () {
-        return React.createElement("h1", null, "This Is The Editor");
+        return React.createElement("h1", null, "This Is The File System");
     };
     return FileSystem;
 }(React.Component));

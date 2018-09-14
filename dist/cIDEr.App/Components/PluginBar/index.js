@@ -14,18 +14,16 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
-var Components_1 = require("../../../cIDEr.Editor/Components");
 ;
-var MainWindow = /** @class */ (function (_super) {
-    __extends(MainWindow, _super);
-    function MainWindow() {
+var PluginBar = /** @class */ (function (_super) {
+    __extends(PluginBar, _super);
+    function PluginBar() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    MainWindow.prototype.render = function () {
-        return (React.createElement("div", { className: "cIDEr-container" },
-            React.createElement(Components_1.Editor, null)));
+    PluginBar.prototype.render = function () {
+        return React.createElement("h1", null, "This Is The Plugin Bar");
     };
-    return MainWindow;
+    return PluginBar;
 }(React.Component));
-exports.MainWindow = MainWindow;
+exports.PluginBar = PluginBar;
 //# sourceMappingURL=index.js.map
