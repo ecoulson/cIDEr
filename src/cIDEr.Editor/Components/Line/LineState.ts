@@ -4,8 +4,8 @@ export class LineState implements ILineState {
 	focused: boolean;
 	line: string;
 
-	constructor() {
+	constructor(line: string) {
 		this.focused = false;
-		this.line = "";
+		this.line = line;
 	}
 }

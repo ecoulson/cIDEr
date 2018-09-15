@@ -7,11 +7,11 @@ export class Cursor {
 		this.column = 0;
 	}
 
-	moveLines(lineCount: number) {
+	seekLines(lineCount: number) {
 		this.line += lineCount;
 	}
 
-	moveColumns(columnCount: number) {
+	seekColumns(columnCount: number) {
 		this.column += columnCount;
 	}
 

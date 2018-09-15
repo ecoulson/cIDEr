@@ -5,19 +5,25 @@ import { LineStyle } from "./LineStyle";
 import { LineState } from "./LineState";
 import { LineNumber } from "../LineNumber/LineNumber";
 
+const LineNumberAttribute: string = "data-line-number";
+const UpArrowKeyCode: number = 38;
+const DownArrowKeyCode: number = 40;
+const ParseIntBaseExponent: number = 10;
+
 export class Line extends React.Component<ILineProps, {}> {
 	readonly state: LineState
-	private cursor: Cursor;
 
 	constructor(props: ILineProps) {
 		super(props);
-		this.state = new LineState();
-		this.cursor = props.cursor;
-		this.makeCurrentLine = this.makeCurrentLine.bind(this);
-		this.handleLineAction = this.handleLineAction.bind(this);
+		this.state = new LineState(props.line);
+		this.setCurrentLine = this.setCurrentLine.bind(this);
+		this.handleLineKeyDownAction = this.handleLineKeyDownAction.bind(this);
+		this.handleLineKeyUpAction = this.handleLineKeyUpAction.bind(this);
+		this.setColumnPosition = this.setColumnPosition.bind(this);
 	}
 
 	render() {
+		console.log(this.state);
 		return(
 			<div key={this.props.lineNumber} style= {{display: "flex"}}>
 				<LineNumber 
@@ -25,9 +31,10 @@ export class Line extends React.Component<ILineProps, {}> {
 					lineNumber={this.props.lineNumber}
 				/>
 				<div 
-					id={`line-${this.props.lineNumber}`} 
-					onMouseUp={this.makeCurrentLine} 
-					onKeyDown={this.handleLineAction} 
+					data-line-number={this.props.lineNumber} 
+					onMouseUp={this.setCurrentLine} 
+					onKeyDown={this.handleLineKeyDownAction}
+					onKeyUp={this.handleLineKeyUpAction}
 					tabIndex={-1}
 					suppressContentEditableWarning 
 					contentEditable
@@ -39,11 +46,11 @@ export class Line extends React.Component<ILineProps, {}> {
 		)
 	}
 
-	private makeCurrentLine(event: React.MouseEvent<HTMLDivElement>) {
+	private setCurrentLine(event: React.MouseEvent<HTMLDivElement>) {
 		if (this.isTargetElementRendered(event.target)) {
 			let lineElement: Element = this.getLineElement(event.target as Element);
-			let lineNumber = this.getLineNumber(lineElement);
-			this.cursor.setLinePosition(lineNumber);
+			this.setColumnPosition();
+			this.setLinePosition(lineElement);
 		}
 	}
 
@@ -58,38 +65,55 @@ export class Line extends React.Component<ILineProps, {}> {
 			return this.getLineElement(targetElement.parentElement);
 	}
 
-	private getLineNumber(lineElement: Element): number {
-		return parseInt(lineElement.id.split('-')[1], 10);
-	}
-
 	private isLineElement(targetElement: Element): boolean {
-		return targetElement.id.indexOf("line-") != -1;
+		return targetElement.hasAttribute(LineNumberAttribute);
 	}
 
-	private handleLineAction(event: React.KeyboardEvent<HTMLDivElement>) {
+	private setColumnPosition() {
+		this.props.cursor.setColumnPosition(
+			window.getSelection().getRangeAt(0).endOffset
+		);
+	}
+
+	private setLinePosition(lineElement: Element) {
+		this.props.cursor.setLinePosition(
+			parseInt(
+				lineElement.getAttribute(LineNumberAttribute), 
+				ParseIntBaseExponent
+			)
+		);
+	}
+
+	private handleLineKeyDownAction(event: React.KeyboardEvent<HTMLDivElement>) {
 		this.props.editorKeyPressAction(event);
-		if (this.arrowKeyPressed(event))
-			this.moveCursor(event);
+		if (this.lineChangeKeyPressed(event))
+			this.changeLine(event);
+		else {
+			this.setColumnPosition();
+		}
 	}
 
-	private arrowKeyPressed(event: React.KeyboardEvent<HTMLDivElement>): boolean {
-		return event.keyCode >= 37 && event.keyCode <= 40;
+	private lineChangeKeyPressed(event: React.KeyboardEvent<HTMLDivElement>): boolean {
+		return event.keyCode == UpArrowKeyCode ||
+				event.keyCode == DownArrowKeyCode;
 	}
 
-	private moveCursor(event: React.KeyboardEvent<HTMLDivElement>): void {
+	private changeLine(event: React.KeyboardEvent<HTMLDivElement>): void {
+		let currentLine : number = this.props.cursor.getCurrentLine();
 		switch (event.keyCode) {
-			case 37:
+			case UpArrowKeyCode:
+				this.props.updateLinePosition(currentLine - 1);
 				break;
-			case 38:
-				this.props.updateLinePosition(this.cursor.getCurrentLine() - 1);
-				break;
-			case 39:
-				break;
-			case 40:
-				this.props.updateLinePosition(this.cursor.getCurrentLine() + 1)
+			case DownArrowKeyCode:
+				this.props.updateLinePosition(currentLine + 1)
 				break;
 			default:
 				break;
 		}
+	}
+
+	private handleLineKeyUpAction(event: React.KeyboardEvent<HTMLDivElement>) {
+		let lineElement : Element = event.target as Element;
+		this.props.updateLine(this.props.lineNumber, lineElement.textContent);
 	}
 }

@@ -7,4 +7,5 @@ export interface ILineProps {
 	focused: boolean;
 	editorKeyPressAction: (event: React.KeyboardEvent<HTMLDivElement>) => any;
 	updateLinePosition: (lineNumber: number) => void;
+	updateLine: (lineNumber: number, lineContent: string) => void;
 };
