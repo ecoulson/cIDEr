@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Editor } from "../../../cIDEr.Editor/Components";
+import { Editor } from "../../../cIDEr.Editor/Components/Editor/Editor";
 import { Toolbar } from "../../../cIDEr.Toolbar/Components";
 import { FileSystem } from "../../../cIDEr.FileSystem/Components";
 import { PluginBar } from "../PluginBar";

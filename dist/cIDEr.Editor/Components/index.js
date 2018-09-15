@@ -1,8 +1,11 @@
 "use strict";
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    }
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -11,6 +14,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var Line_1 = require("./Line");
+var Cursor_1 = require("../Cursor/Cursor");
 var initialState = { lines: [""] };
 ;
 var Editor = /** @class */ (function (_super) {
@@ -18,13 +23,9 @@ var Editor = /** @class */ (function (_super) {
     function Editor(props) {
         var _this = _super.call(this, props) || this;
         _this.state = initialState;
-        _this.lineKeyPressAction = _this.lineKeyPressAction.bind(_this);
-        _this.selectLineAction = _this.selectLineAction.bind(_this);
-        _this.lineKeyReleasedAction = _this.lineKeyReleasedAction.bind(_this);
-        _this.cursor = {
-            line: 0
-        };
-        ;
+        _this.editorKeyPressAction = _this.editorKeyPressAction.bind(_this);
+        _this.updateLinePosition = _this.updateLinePosition.bind(_this);
+        _this.cursor = new Cursor_1.Cursor();
         return _this;
     }
     Editor.prototype.render = function () {
@@ -33,66 +34,36 @@ var Editor = /** @class */ (function (_super) {
     Editor.prototype.renderLines = function () {
         var _this = this;
         return this.state.lines.map(function (line, i) {
-            return (React.createElement("div", { key: i, style: { display: "flex" } },
-                React.createElement("span", null, i + 1),
-                React.createElement("div", { id: "line-" + i, onMouseUp: _this.selectLineAction, onKeyDown: _this.lineKeyPressAction, onKeyUp: _this.lineKeyReleasedAction, tabIndex: -1, suppressContentEditableWarning: true, contentEditable: true, style: {
-                        width: "100%",
-                        backgroundColor: "rgb(240,240,240)",
-                        whiteSpace: "nowrap",
-                        outline: "none"
-                    } }, line)));
+            return (React.createElement(Line_1.Line, { key: i, lineNumber: i, line: line, cursor: _this.cursor, updateLinePosition: _this.updateLinePosition, editorKeyPressAction: _this.editorKeyPressAction }));
         });
     };
-    Editor.prototype.selectLineAction = function (event) {
-        var selectedLine = this.getLineElement(event.target);
-        if (selectedLine != null) {
-            var lineId = selectedLine.id;
-            this.cursor.line = parseInt(lineId.split('-')[1], 10);
+    Editor.prototype.editorKeyPressAction = function (event) {
+        if (this.enterWasPressed(event))
+            this.createNewLine(event);
+    };
+    Editor.prototype.enterWasPressed = function (event) {
+        return event.keyCode == 13;
+    };
+    Editor.prototype.createNewLine = function (event) {
+        event.preventDefault();
+        this.state.lines.splice(this.cursor.getCurrentLine() + 1, 0, "");
+        this.cursor.moveLines(1);
+        this.setState({
+            lines: this.state.lines
+        });
+    };
+    Editor.prototype.updateLinePosition = function (line) {
+        if (line >= 0 && line < this.state.lines.length) {
+            this.cursor.setLinePosition(line);
+            this.focusOnCurrentCursorLine(this.cursor);
         }
     };
-    Editor.prototype.getLineElement = function (target) {
-        if (target == null)
-            return target;
-        if (target.id.indexOf("line-") != -1)
-            return target;
-        else
-            return this.getLineElement(target.parentElement);
-    };
-    Editor.prototype.lineKeyPressAction = function (event) {
-        if (event.keyCode == 9) {
-            event.preventDefault();
-        }
-        if (event.keyCode == 13) {
-            event.preventDefault();
-            var lines = this.state.lines;
-            lines.splice(this.cursor.line + 1, 0, "");
-            this.cursor.line++;
-            this.setState({
-                lines: lines
-            });
-        }
-        if (this.characterWasEntered(event)) {
-            var selectedLine = this.getLineElement(event.target);
-            this.state.lines[this.cursor.line] = selectedLine.textContent + event.key;
-        }
-    };
-    Editor.prototype.characterWasEntered = function (event) {
-        return (event.keyCode >= 48 && event.keyCode <= 90) ||
-            (event.keyCode >= 96 && event.keyCode <= 111) ||
-            (event.keyCode >= 186 && event.keyCode <= 222);
-    };
-    Editor.prototype.lineKeyReleasedAction = function (event) {
-        this.removeLineBreaks(this.getLineElement(event.target));
-    };
-    Editor.prototype.removeLineBreaks = function (line) {
-        for (var i = 0; i < line.childElementCount; i++) {
-            line.removeChild(line.children[i]);
-        }
+    Editor.prototype.focusOnCurrentCursorLine = function (cursor) {
+        var element = document.getElementById("line-" + cursor.line);
+        element.focus();
     };
     Editor.prototype.componentDidUpdate = function () {
-        var element = document.getElementById("line-" + this.cursor.line);
-        console.log(document.body, element, "line-" + this.cursor.line);
-        element.focus();
+        this.focusOnCurrentCursorLine(this.cursor);
     };
     return Editor;
 }(React.Component));
