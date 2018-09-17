@@ -27,7 +27,6 @@ export class Editor extends React.Component<IEditorProps, {}> {
 	}
 
 	render() {
-		console.log(this.state);
 		return (
 			<div style={{width: "100vw"}}>
 				{this.renderLines()}
@@ -54,10 +53,20 @@ export class Editor extends React.Component<IEditorProps, {}> {
 	}
 
 	private editorKeyPressAction(event: React.KeyboardEvent<HTMLDivElement>) {
+		this.displayCursor();
 		if (this.enterWasPressed(event))
 			this.createNewLine(event);
 		if (this.shouldRemoveLine(event))
 			this.deleteLine();
+	}
+
+	private displayCursor() {
+		console.log(this.getCurrentLineElement().childNodes, this.cursor.getCurrentColumn());
+	}
+
+	private getCurrentLineElement() {
+		let attributeSelector = `[data-line-number="${this.cursor.getCurrentLine()}"]`;
+		return document.querySelector(attributeSelector) as HTMLElement;
 	}
 
 	private enterWasPressed(event: React.KeyboardEvent<HTMLDivElement>): boolean {
@@ -66,7 +75,7 @@ export class Editor extends React.Component<IEditorProps, {}> {
 
 	private createNewLine(event: React.KeyboardEvent<HTMLDivElement>): void {
 		event.preventDefault();
-		this.state.lines.splice(this.cursor.getCurrentLine(), InsertLineMode, EmptyLine);
+		this.state.lines.splice(this.cursor.getCurrentLine() + 1, InsertLineMode, EmptyLine);
 		this.cursor.seekLines(1);
 		this.setState({
 			lines: this.state.lines
@@ -85,9 +94,7 @@ export class Editor extends React.Component<IEditorProps, {}> {
 	}
 
 	private focusOnCurrentLine(): void {
-		let attributeSelector = `[data-line-number="${this.cursor.getCurrentLine()}"]`;
-		let element = document.querySelector(attributeSelector) as HTMLElement;
-		element.focus();
+		this.getCurrentLineElement().focus();
 	}
 
 	private shouldRemoveLine(event: React.KeyboardEvent<HTMLDivElement>): boolean {
@@ -97,8 +104,9 @@ export class Editor extends React.Component<IEditorProps, {}> {
 
 	private deleteLine() {
 		if (this.canDeleteLine()) {
-			this.cursor.seekLines(-1);
+			this.state.lines[this.cursor.getCurrentLine() - 1] += this.state.lines[this.cursor.getCurrentLine()];
 			this.state.lines.splice(this.cursor.getCurrentLine(), DeleteLineMode);
+			this.cursor.seekLines(-1);
 			this.setState({
 				lines: this.state.lines
 			});

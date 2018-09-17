@@ -4,6 +4,8 @@ import { ILineProps } from "./ILineProps";
 import { LineStyle } from "./LineStyle";
 import { LineState } from "./LineState";
 import { LineNumber } from "../LineNumber/LineNumber";
+import { KeyCombination } from "../../KeyboardCombination/KeyCombination";
+import { Key } from "../../KeyboardCombination/Keys";
 
 const LineNumberAttribute: string = "data-line-number";
 const UpArrowKeyCode: number = 38;
@@ -12,18 +14,18 @@ const ParseIntBaseExponent: number = 10;
 
 export class Line extends React.Component<ILineProps, {}> {
 	readonly state: LineState
+	private keyCombination: KeyCombination;
 
 	constructor(props: ILineProps) {
 		super(props);
-		this.state = new LineState(props.line);
+		this.state = new LineState();
+		this.keyCombination = new KeyCombination();
 		this.setCurrentLine = this.setCurrentLine.bind(this);
 		this.handleLineKeyDownAction = this.handleLineKeyDownAction.bind(this);
-		this.handleLineKeyUpAction = this.handleLineKeyUpAction.bind(this);
 		this.setColumnPosition = this.setColumnPosition.bind(this);
 	}
 
 	render() {
-		console.log(this.state);
 		return(
 			<div key={this.props.lineNumber} style= {{display: "flex"}}>
 				<LineNumber 
@@ -34,7 +36,6 @@ export class Line extends React.Component<ILineProps, {}> {
 					data-line-number={this.props.lineNumber} 
 					onMouseUp={this.setCurrentLine} 
 					onKeyDown={this.handleLineKeyDownAction}
-					onKeyUp={this.handleLineKeyUpAction}
 					tabIndex={-1}
 					suppressContentEditableWarning 
 					contentEditable
@@ -85,17 +86,20 @@ export class Line extends React.Component<ILineProps, {}> {
 	}
 
 	private handleLineKeyDownAction(event: React.KeyboardEvent<HTMLDivElement>) {
-		this.props.editorKeyPressAction(event);
+		event.preventDefault();
+		this.keyCombination.setCombination(event);
 		if (this.lineChangeKeyPressed(event))
 			this.changeLine(event);
-		else {
-			this.setColumnPosition();
-		}
+		if (this.keyCombination.isCharacterKeyPressed())
+			this.appendCharacterToLine();
+		if (this.isDeleteKeyPressed())
+			this.deleteLineContent();
+		this.props.editorKeyPressAction(event);
 	}
 
 	private lineChangeKeyPressed(event: React.KeyboardEvent<HTMLDivElement>): boolean {
-		return event.keyCode == UpArrowKeyCode ||
-				event.keyCode == DownArrowKeyCode;
+		return this.keyCombination.isKeyPressed(Key.ArrowUp) ||
+				this.keyCombination.isKeyPressed(Key.ArrowDown);
 	}
 
 	private changeLine(event: React.KeyboardEvent<HTMLDivElement>): void {
@@ -112,8 +116,27 @@ export class Line extends React.Component<ILineProps, {}> {
 		}
 	}
 
-	private handleLineKeyUpAction(event: React.KeyboardEvent<HTMLDivElement>) {
-		let lineElement : Element = event.target as Element;
-		this.props.updateLine(this.props.lineNumber, lineElement.textContent);
+	private appendCharacterToLine() {
+		this.props.cursor.seekColumns(1);
+		this.props.updateLine(
+			this.props.lineNumber, 
+			this.props.line + this.keyCombination.getKey()
+		);
+	}
+
+	private isDeleteKeyPressed() {
+		return this.keyCombination.isKeyPressed(Key.Delete) ||
+				this.keyCombination.isKeyPressed(Key.Backspace);
+	}
+
+	private deleteLineContent() {
+		// TODO: handle selections
+		if (this.props.cursor.getCurrentColumn() > 0) {
+			let lineSegmentBeforeDeletion = this.props.line.substring(0, this.props.cursor.getCurrentColumn() - 1);
+			let lineSegmentAfterDeletion = this.props.line.substring(this.props.cursor.getCurrentColumn() + 1, this.props.line.length);
+			let newLine = lineSegmentBeforeDeletion + lineSegmentAfterDeletion;
+			this.props.cursor.seekColumns(-1);
+			this.props.updateLine(this.props.lineNumber, newLine);
+		}
 	}
 }
