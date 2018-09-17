@@ -6,6 +6,7 @@ import { LineState } from "./LineState";
 import { LineNumber } from "../LineNumber/LineNumber";
 import { KeyCombination } from "../../KeyboardCombination/KeyCombination";
 import { Key } from "../../KeyboardCombination/Keys";
+import { timingSafeEqual } from "crypto";
 
 const LineNumberAttribute: string = "data-line-number";
 const UpArrowKeyCode: number = 38;
@@ -55,7 +56,7 @@ export class Line extends React.Component<ILineProps, {}> {
 		}
 	}
 
-	private isTargetElementRendered(target: EventTarget): boolean {
+	private isTargetElementRendered(target: EventTarget) {
 		return (target as Element) != null;
 	}
 
@@ -90,6 +91,8 @@ export class Line extends React.Component<ILineProps, {}> {
 		this.keyCombination.setCombination(event);
 		if (this.lineChangeKeyPressed(event))
 			this.changeLine(event);
+		if (this.columnChangeKeyPressed(event))
+			this.changeColumn();
 		if (this.keyCombination.isCharacterKeyPressed())
 			this.appendCharacterToLine();
 		if (this.isDeleteKeyPressed())
@@ -97,23 +100,29 @@ export class Line extends React.Component<ILineProps, {}> {
 		this.props.editorKeyPressAction(event);
 	}
 
-	private lineChangeKeyPressed(event: React.KeyboardEvent<HTMLDivElement>): boolean {
+	private lineChangeKeyPressed(event: React.KeyboardEvent<HTMLDivElement>) {
 		return this.keyCombination.isKeyPressed(Key.ArrowUp) ||
 				this.keyCombination.isKeyPressed(Key.ArrowDown);
 	}
 
-	private changeLine(event: React.KeyboardEvent<HTMLDivElement>): void {
+	private changeLine(event: React.KeyboardEvent<HTMLDivElement>) {
 		let currentLine : number = this.props.cursor.getCurrentLine();
-		switch (event.keyCode) {
-			case UpArrowKeyCode:
-				this.props.updateLinePosition(currentLine - 1);
-				break;
-			case DownArrowKeyCode:
-				this.props.updateLinePosition(currentLine + 1)
-				break;
-			default:
-				break;
-		}
+		if (this.keyCombination.isKeyPressed(Key.ArrowUp))
+			this.props.updateLinePosition(currentLine - 1);
+		if (this.keyCombination.isKeyPressed(Key.ArrowDown))
+			this.props.updateLinePosition(currentLine + 1);
+	}
+
+	private columnChangeKeyPressed(event: React.KeyboardEvent<HTMLDivElement>) {
+		return this.keyCombination.isKeyPressed(Key.ArrowLeft) ||
+				this.keyCombination.isKeyPressed(Key.ArrowRight);
+	}
+
+	private changeColumn() {
+		if (this.keyCombination.isKeyPressed(Key.ArrowLeft) && this.props.cursor.getCurrentColumn() > 0)
+			this.props.cursor.seekColumns(-1);
+		if (this.keyCombination.isKeyPressed(Key.ArrowRight) && this.props.cursor.getCurrentColumn() < this.props.line.length)
+			this.props.cursor.seekColumns(1);
 	}
 
 	private appendCharacterToLine() {

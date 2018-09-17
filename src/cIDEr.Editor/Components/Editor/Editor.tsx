@@ -53,7 +53,6 @@ export class Editor extends React.Component<IEditorProps, {}> {
 	}
 
 	private editorKeyPressAction(event: React.KeyboardEvent<HTMLDivElement>) {
-		this.displayCursor();
 		if (this.enterWasPressed(event))
 			this.createNewLine(event);
 		if (this.shouldRemoveLine(event))
@@ -61,8 +60,18 @@ export class Editor extends React.Component<IEditorProps, {}> {
 	}
 
 	private displayCursor() {
-		console.log(this.getCurrentLineElement().childNodes, this.cursor.getCurrentColumn());
+		if (this.getCurrentLineElement().hasChildNodes()) {
+			let range = document.createRange();
+			let lineElement = this.getCurrentLineElement();
+			range.setStart(lineElement.firstChild, this.cursor.getCurrentColumn());
+			range.setEnd(lineElement.firstChild, this.cursor.getCurrentColumn());
+			var selection = window.getSelection();
+			selection.removeAllRanges();
+			selection.addRange(range);
+		}
 	}
+
+	//TODO: Move the cursor to the state of the react component
 
 	private getCurrentLineElement() {
 		let attributeSelector = `[data-line-number="${this.cursor.getCurrentLine()}"]`;
@@ -77,6 +86,7 @@ export class Editor extends React.Component<IEditorProps, {}> {
 		event.preventDefault();
 		this.state.lines.splice(this.cursor.getCurrentLine() + 1, InsertLineMode, EmptyLine);
 		this.cursor.seekLines(1);
+		this.cursor.setColumnPosition(0);
 		this.setState({
 			lines: this.state.lines
 		});
@@ -126,5 +136,6 @@ export class Editor extends React.Component<IEditorProps, {}> {
 
 	componentDidUpdate() {
 		this.focusOnCurrentLine();
+		this.displayCursor();
 	}
 }
