@@ -15,11 +15,9 @@ const EmptyLine: string = "";
 
 export class Editor extends React.Component<IEditorProps, {}> {
 	readonly state: IEditorState;
-	private cursor: Cursor;
 
 	constructor(props: IEditorProps) {
 		super(props);
-		this.cursor = new Cursor();
 		this.state = new EditorState();
 		this.editorKeyPressAction = this.editorKeyPressAction.bind(this);
 		this.updateLinePosition = this.updateLinePosition.bind(this);
@@ -41,8 +39,8 @@ export class Editor extends React.Component<IEditorProps, {}> {
 					key={lineIndex}
 					lineNumber={lineIndex} 
 					line={line}
-					cursor={this.cursor}
-					focused={lineIndex == this.cursor.getCurrentLine()}
+					cursor={this.state.cursor}
+					focused={lineIndex == this.state.cursor.getCurrentLine()}
 					editorKeyPressAction={this.editorKeyPressAction}
 					updateLinePosition={this.updateLinePosition}
 					updateLine={this.updateLine}
@@ -53,29 +51,17 @@ export class Editor extends React.Component<IEditorProps, {}> {
 	}
 
 	private editorKeyPressAction(event: React.KeyboardEvent<HTMLDivElement>) {
+		this.updateCursor();
 		if (this.enterWasPressed(event))
 			this.createNewLine(event);
 		if (this.shouldRemoveLine(event))
 			this.deleteLine();
 	}
 
-	private displayCursor() {
-		if (this.getCurrentLineElement().hasChildNodes()) {
-			let range = document.createRange();
-			let lineElement = this.getCurrentLineElement();
-			range.setStart(lineElement.firstChild, this.cursor.getCurrentColumn());
-			range.setEnd(lineElement.firstChild, this.cursor.getCurrentColumn());
-			var selection = window.getSelection();
-			selection.removeAllRanges();
-			selection.addRange(range);
-		}
-	}
-
-	//TODO: Move the cursor to the state of the react component
-
-	private getCurrentLineElement() {
-		let attributeSelector = `[data-line-number="${this.cursor.getCurrentLine()}"]`;
-		return document.querySelector(attributeSelector) as HTMLElement;
+	private updateCursor() {
+		this.setState({
+			cursor: this.state.cursor
+		});
 	}
 
 	private enterWasPressed(event: React.KeyboardEvent<HTMLDivElement>): boolean {
@@ -84,9 +70,8 @@ export class Editor extends React.Component<IEditorProps, {}> {
 
 	private createNewLine(event: React.KeyboardEvent<HTMLDivElement>): void {
 		event.preventDefault();
-		this.state.lines.splice(this.cursor.getCurrentLine() + 1, InsertLineMode, EmptyLine);
-		this.cursor.seekLines(1);
-		this.cursor.setColumnPosition(0);
+		this.state.lines.splice(this.state.cursor.getCurrentLine() + 1, InsertLineMode, EmptyLine);
+		this.state.cursor.seekLines(1);
 		this.setState({
 			lines: this.state.lines
 		});
@@ -94,7 +79,7 @@ export class Editor extends React.Component<IEditorProps, {}> {
 	
 	private updateLinePosition(line: number): void {
 		if (this.isLineInEditor(line)) {
-			this.cursor.setLinePosition(line);
+			this.state.cursor.setLinePosition(line);
 			this.focusOnCurrentLine();
 		}
 	}
@@ -107,16 +92,21 @@ export class Editor extends React.Component<IEditorProps, {}> {
 		this.getCurrentLineElement().focus();
 	}
 
+	private getCurrentLineElement() {
+		let attributeSelector = `[data-line-number="${this.state.cursor.getCurrentLine()}"]`;
+		return document.querySelector(attributeSelector) as HTMLElement;
+	}
+
 	private shouldRemoveLine(event: React.KeyboardEvent<HTMLDivElement>): boolean {
 		return event.keyCode == BackSpaceKeyCode && 
-				this.cursor.getCurrentColumn() == StartColumn;
+				this.state.cursor.getCurrentColumn() == StartColumn;
 	}
 
 	private deleteLine() {
 		if (this.canDeleteLine()) {
-			this.state.lines[this.cursor.getCurrentLine() - 1] += this.state.lines[this.cursor.getCurrentLine()];
-			this.state.lines.splice(this.cursor.getCurrentLine(), DeleteLineMode);
-			this.cursor.seekLines(-1);
+			this.state.lines[this.state.cursor.getCurrentLine() - 1] += this.state.lines[this.state.cursor.getCurrentLine()];
+			this.state.lines.splice(this.state.cursor.getCurrentLine(), DeleteLineMode);
+			this.state.cursor.seekLines(-1);
 			this.setState({
 				lines: this.state.lines
 			});
@@ -124,7 +114,7 @@ export class Editor extends React.Component<IEditorProps, {}> {
 	}
 
 	private canDeleteLine(): boolean {
-		return this.cursor.getCurrentLine() > StartLine;
+		return this.state.cursor.getCurrentLine() > StartLine;
 	}
 
 	private updateLine(lineNumber: number, lineContent: string) {
@@ -137,5 +127,20 @@ export class Editor extends React.Component<IEditorProps, {}> {
 	componentDidUpdate() {
 		this.focusOnCurrentLine();
 		this.displayCursor();
+	}
+
+	private displayCursor() {
+		if (this.getCurrentLineElement().hasChildNodes()) {
+			let range = document.createRange();
+			let lineElement = this.getCurrentLineElement();
+			let column = this.state.cursor.getCurrentColumn() >= lineElement.textContent.length ?
+				lineElement.textContent.length:
+				this.state.cursor.getCurrentColumn();
+			range.setStart(lineElement.firstChild, column);
+			range.setEnd(lineElement.firstChild, column);
+			var selection = window.getSelection();
+			selection.removeAllRanges();
+			selection.addRange(range);
+		}
 	}
 }

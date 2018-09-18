@@ -90,7 +90,7 @@ export class Line extends React.Component<ILineProps, {}> {
 		event.preventDefault();
 		this.keyCombination.setCombination(event);
 		if (this.lineChangeKeyPressed(event))
-			this.changeLine(event);
+			this.changeLine();
 		if (this.columnChangeKeyPressed(event))
 			this.changeColumn();
 		if (this.keyCombination.isCharacterKeyPressed())
@@ -105,7 +105,7 @@ export class Line extends React.Component<ILineProps, {}> {
 				this.keyCombination.isKeyPressed(Key.ArrowDown);
 	}
 
-	private changeLine(event: React.KeyboardEvent<HTMLDivElement>) {
+	private changeLine() {
 		let currentLine : number = this.props.cursor.getCurrentLine();
 		if (this.keyCombination.isKeyPressed(Key.ArrowUp))
 			this.props.updateLinePosition(currentLine - 1);
@@ -118,7 +118,7 @@ export class Line extends React.Component<ILineProps, {}> {
 				this.keyCombination.isKeyPressed(Key.ArrowRight);
 	}
 
-	private changeColumn() {
+	private changeColumn() {	
 		if (this.keyCombination.isKeyPressed(Key.ArrowLeft) && this.props.cursor.getCurrentColumn() > 0)
 			this.props.cursor.seekColumns(-1);
 		if (this.keyCombination.isKeyPressed(Key.ArrowRight) && this.props.cursor.getCurrentColumn() < this.props.line.length)
